@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
+
 namespace Pianito
 {
     /// <summary>
@@ -20,9 +23,31 @@ namespace Pianito
     /// </summary>
     public partial class MainWindow : Window
     {
+        private WaveOut waveOut;
+        private MixingSampleProvider mixer;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            waveOut = new WaveOut();
+            mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(44100, 1));
+
+            mixer.ReadFully = true;
+            waveOut.Init(mixer);
+            waveOut.Play();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            
+             var nota_do = new SignalGenerator(44100,1)
+            {
+                Gain = 0.5,
+                Frequency = 730.8,
+                Type = SignalGeneratorType.Sin
+            }.Take(TimeSpan.FromMilliseconds(250));
+            mixer.AddMixerInput(nota_do);                 
         }
     }
 }
